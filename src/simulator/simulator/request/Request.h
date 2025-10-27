@@ -37,6 +37,8 @@
 
 #include <cstdint>
 #include <systemc>
+#include <iostream>
+using namespace std;
 
 struct Request
 {
@@ -50,4 +52,16 @@ struct Request
     std::size_t length{};
     sc_core::sc_time delay{};
     std::vector<unsigned char> data{};
+  inline friend ostream&
+  operator<< (ostream &os, const Request &req)
+  {
+    os << hex << "Request: Command(0:read)" << int(req.command) << "), address(0x"
+	<< req.address << "), length(0x" << req.length << "), delay(0x"
+	<< req.delay << ")";
+    if (req.data.size() > 0) {
+	os << "data[0](0x" << req.data[0] << ")";
+    }
+    os << dec << endl;
+    return os;
+  }
 };

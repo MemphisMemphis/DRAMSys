@@ -93,6 +93,7 @@ void RequestIssuer::sendNextRequest()
     }
 
     delay = sendingTime - sc_core::sc_time_stamp();
+    std::cout << __FUNCTION__ << "[" << sc_core::sc_time_stamp() << "]:" << request;
     iSocket->nb_transport_fw(payload, phase, delay);
 
     if (request.command == Request::Command::Read)
