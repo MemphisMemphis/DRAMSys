@@ -57,6 +57,7 @@ add_library(simulator
 target_include_directories(simulator
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
+        ../libdramsys/DRAMSys/common
 )
 
 target_link_libraries(simulator

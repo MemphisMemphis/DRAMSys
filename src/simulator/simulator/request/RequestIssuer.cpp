@@ -34,6 +34,9 @@
  */
 
 #include "RequestIssuer.h"
+#define DEBUG_LOG
+#include "log.h"
+
 
 RequestIssuer::RequestIssuer(sc_core::sc_module_name const& name,
                              MemoryManager& memoryManager,
@@ -93,7 +96,7 @@ void RequestIssuer::sendNextRequest()
     }
 
     delay = sendingTime - sc_core::sc_time_stamp();
-    std::cout << __FUNCTION__ << "[" << sc_core::sc_time_stamp() << "]:" << request;
+    LOG_SC(request);
     iSocket->nb_transport_fw(payload, phase, delay);
 
     if (request.command == Request::Command::Read)

@@ -53,7 +53,7 @@ struct Request
     sc_core::sc_time delay{};
     std::vector<unsigned char> data{};
   inline friend ostream&
-  operator<< (ostream &os, const Request &req)
+  operator << (ostream &os, const Request &req)
   {
     os << hex << "Request: Command(0:read)" << int(req.command) << "), address(0x"
 	<< req.address << "), length(0x" << req.length << "), delay(0x"
