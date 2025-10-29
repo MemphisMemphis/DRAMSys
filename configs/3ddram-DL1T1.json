@@ -9,7 +9,7 @@
             {
                 "type": "player",
                 "clkMhz": 400,
-                "name": "traces/pct.stl"
+                "name": "traces/pct_512.stl"
             }
         ]
     }
