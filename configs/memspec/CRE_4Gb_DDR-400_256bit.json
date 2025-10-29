@@ -5,11 +5,11 @@
             "dataRate": 1,
             "nbrOfBanks": 1,
             "nbrOfColumns": 64,
-            "nbrOfRanks": 1,
+            "nbrOfRanks": 4,
             "nbrOfRows": 16384,
             "width": 256,
        	    "nbrOfDevices": 4,
-            "nbrOfChannels": 4,
+            "nbrOfChannels": 1,
             "maxBurstLength": 16
         },
         "memoryId": "CRE_4Gb_DDR-400_256bit",

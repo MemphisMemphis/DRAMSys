@@ -9,7 +9,7 @@
             {
                 "type": "player",
                 "clkMhz": 400,
-                "name": "traces/example.stl"
+                "name": "traces/pct.stl"
             }
         ]
     }
