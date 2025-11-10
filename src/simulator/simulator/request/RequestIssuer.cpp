@@ -34,7 +34,7 @@
  */
 
 #include "RequestIssuer.h"
-#define DEBUG_LOG
+//#define DEBUG_LOG
 #include "log.h"
 
 
