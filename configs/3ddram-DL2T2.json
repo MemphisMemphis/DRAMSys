@@ -2,9 +2,9 @@
     "simulation": {
         "addressmapping": "addressmapping/cre_3ddram_1Mbx256_DL2T2_rc.json",
         "mcconfig": "mcconfig/fr_fcfs.json",
-        "memspec": "memspec/CRE_4x4Gb_DDR-400_256bit.json",
-        "simconfig": "simconfig/example.json",
-        "simulationid": "3ddram-DL1T1",
+        "memspec": "memspec/CRE_8x4Gb_DDR-400_256bit.json",
+        "simconfig": "simconfig/cre_DL2T2.json",
+        "simulationid": "3ddram-DL2T2",
         "tracesetup": [
             {
                 "type": "player",

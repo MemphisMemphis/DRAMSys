@@ -1,16 +1,16 @@
 {
     "memspec": {
         "memarchitecturespec": {
-            "burstLength": 4,
+            "burstLength": 1,
             "dataRate": 1,
             "nbrOfBanks": 1,
             "nbrOfColumns": 64,
-            "nbrOfRanks": 4,
+            "nbrOfRanks": 1,
             "nbrOfRows": 16384,
             "width": 256,
-       	    "nbrOfDevices": 4,
+       	    "nbrOfDevices": 8,
             "nbrOfChannels": 1,
-            "maxBurstLength": 16
+            "maxBurstLength": 4
         },
         "memoryId": "CRE_4Gb_DDR-400_256bit",
         "memoryType": "DDR3",
@@ -39,7 +39,7 @@
             "RAS": 28,
             "RC": 38,
             "RCD": 10,
-            "REFI": 6240,
+            "REFI": 3120,
             "RFC": 88,
             "RL": 10,
             "RP": 10,
