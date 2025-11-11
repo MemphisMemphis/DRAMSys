@@ -9,7 +9,7 @@
             "nbrOfRows": 16384,
             "width": 256,
        	    "nbrOfDevices": 8,
-            "nbrOfChannels": 1,
+            "nbrOfChannels": 4,
             "maxBurstLength": 4
         },
         "memoryId": "CRE_4Gb_DDR-400_256bit",

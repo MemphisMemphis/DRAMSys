@@ -1,7 +1,5 @@
 {
     "addressmapping": {
-        "RANK_BIT": [
-        ],
         "BYTE_BIT": [
 			0,
 			1,
@@ -33,7 +31,11 @@
             23,
             24
         ],
+		"RANK_BIT": [
+		 ],
 		"CHANNEL_BIT": [
+			25,
+			26
 	    ]
     }
 }

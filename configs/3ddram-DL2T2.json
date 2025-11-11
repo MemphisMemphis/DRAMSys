@@ -9,7 +9,7 @@
             {
                 "type": "player",
                 "clkMhz": 400,
-                "name": "traces/512_write_29bit.stl"
+                "name": "traces/512_write_27bit.stl"
             }
         ]
     }
