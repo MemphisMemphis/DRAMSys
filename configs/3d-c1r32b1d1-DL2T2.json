@@ -1,0 +1,16 @@
+{
+    "simulation": {
+        "addressmapping": "addressmapping/cre_c1r32b1d1_1Mbx256_DL2T2.json",
+        "mcconfig": "mcconfig/fr_fcfs.json",
+        "memspec": "memspec/CRE_c1r32b1d1_4Gb_DDR-400_256bit.json",
+        "simconfig": "simconfig/cre_DL2T2.json",
+        "simulationid": "3d-c1r32b1d1-DL2T2",
+        "tracesetup": [
+            {
+                "type": "player",
+                "clkMhz": 400,
+                "name": "traces/16384_write_30bits.stl"
+            }
+        ]
+    }
+}

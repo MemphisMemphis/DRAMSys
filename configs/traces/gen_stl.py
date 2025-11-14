@@ -1,7 +1,7 @@
 import random
 
-burst_len = 512
-max_address_bit = 29
+burst_len = 512*32
+max_address_bit = 30
 trace_file_name = str(burst_len) + '_write_' + str(max_address_bit) + 'bits.stl'
 random_file_name = str(burst_len) + '_random_' + str(max_address_bit) + 'bits.stl'
 max_address = 1 << max_address_bit
@@ -21,7 +21,7 @@ trace_file.close();
 random_seed = 0
 
 # using the same seed multiple times
-random_block_bit = 27
+random_block_bit = 30
 random_max_address = 1 << random_block_bit
 
 
