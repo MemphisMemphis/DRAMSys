@@ -54,7 +54,10 @@ CheckerDDR3::CheckerDDR3(const MemSpecDDR3& memSpec) : memSpec(memSpec)
     last4ActivatesOnRank = RankVector<std::queue<sc_time>>(memSpec.ranksPerChannel);
 
     tBURST = ((memSpec.defaultBurstLength / memSpec.dataRate) * memSpec.tCK);
-    tRDWR = (((memSpec.tRL + tBURST) + (memSpec.tCK * 2)) - memSpec.tWL);
+    /* Rd to Wr delay
+     * CX4 tRTWp = 5, CX4 spec. Figure 43
+     */
+    tRDWR = (((memSpec.tRL + tBURST) + (memSpec.tCK * 5/*2*/)) - memSpec.tWL);
     tRDWR_R = (((memSpec.tRL + tBURST) + memSpec.tRTRS) - memSpec.tWL);
     tWRRD = (((memSpec.tWL + tBURST) + memSpec.tWTR) - memSpec.tAL);
     tWRRD_R = (((memSpec.tWL + tBURST) + memSpec.tRTRS) - memSpec.tRL);
