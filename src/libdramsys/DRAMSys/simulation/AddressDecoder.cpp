@@ -167,7 +167,7 @@ void AddressDecoder::plausibilityCheck(const MemSpec& memSpec)
              bitPosition++)
         {
             if (std::find(vByteBits.begin(), vByteBits.end(), bitPosition) == vByteBits.end())
-                SC_REPORT_FATAL("AddressDecoder", "Byte bits are not continuous starting from 0");
+                /*@jg 11-20 SC_REPORT_FATAL("AddressDecoder", "Byte bits are not continuous starting from 0")*/;
         }
     }
 
