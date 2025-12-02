@@ -78,22 +78,9 @@ sc_time CheckerDDR3::timeToSatisfyConstraints(Command command, const tlm_generic
 
     
     earliestTimeToStart = std::max(earliestTimeToStart, nextCommandByBank[command][bank]);
-    //@jg 11-27 Bank (RD, RD) memSpec.tCCD + 2  different bank
-    {
-      static Bank last_bank = Bank(0);
-      if (Command::RD == command) {
-        // std::cout << "RD bank: " << static_cast<long>(bank) << "\n";
-        if (last_bank == bank) {
-
-        } else {
-          earliestTimeToStart = earliestTimeToStart + 2 * memSpec.tCK;
-        }
-      }
-      last_bank = bank;
-    }
-
     earliestTimeToStart = std::max(earliestTimeToStart, nextCommandByRank[command][rank]);
     earliestTimeToStart = std::max(earliestTimeToStart, nextCommandOnBus);
+
     return earliestTimeToStart;
 }
 

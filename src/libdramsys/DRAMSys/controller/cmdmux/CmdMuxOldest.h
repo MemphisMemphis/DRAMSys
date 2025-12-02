@@ -46,13 +46,10 @@ class CmdMuxOldest : public CmdMuxIF
 public:
     explicit CmdMuxOldest(const MemSpec& memSpec);
     std::optional<CommandTuple::Type> selectCommand(const ReadyCommands& readyCommands) override;
-    inline sc_core::sc_time getGapTime() { return scGapTime; }
-    inline void resetGapTime() { scGapTime = scMaxTime; }
 
 private:
     const MemSpec& memSpec;
     const sc_core::sc_time scMaxTime = sc_core::sc_max_time();
-    sc_core::sc_time scGapTime = sc_core::sc_max_time();
 };
 
 class CmdMuxOldestRasCas : public CmdMuxIF

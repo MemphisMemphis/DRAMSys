@@ -75,14 +75,8 @@ std::optional<CommandTuple::Type> CmdMuxOldest::selectCommand(const ReadyCommand
 
     assert(result != readyCommands.cend());
 
-    if (std::get<CommandTuple::Timestamp>(*result) != sc_time_stamp()) {
-//      std::cout << "CmdMuxOldest::selectCommand() return null: command time("
-//          << std::get<CommandTuple::Timestamp>(*result)
-//          << ", current time: " << sc_time_stamp() << std::endl;
-      scGapTime = std::get<CommandTuple::Timestamp>(*result) - sc_time_stamp();
-      return std::nullopt;
-    }
-
+    if (std::get<CommandTuple::Timestamp>(*result) != sc_time_stamp())
+        return std::nullopt;
 
     return *result;
 }

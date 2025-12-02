@@ -419,8 +419,6 @@ void Controller::controllerMethod()
 
     // (5) Select one of the ready commands and issue it to the DRAM
     bool readyCmdBlocked = false;
-    sc_time timeForNextTrigger = scMaxTime;
-    sc_time localTime;
     if (!readyCommands.empty())
     {
         for (auto& it : readyCommands)
@@ -487,19 +485,13 @@ void Controller::controllerMethod()
             iSocket->nb_transport_fw(*trans, phase, fwDelay);
         }
         else
-        {
-            /*@jg 11-27
-             *  commandTuple NO value, command's time advanced sc_time_stamp().
-             *  set timeForNextTrigger to this gap.
-             */
-            timeForNextTrigger = cmdMux->getGapTime() + sc_time_stamp();
-            cmdMux->resetGapTime();
             readyCmdBlocked = true;
-        }
     }
 
     // (6) Restart bank machines, refresh managers and power-down managers to issue new requests for
     // the future
+    sc_time timeForNextTrigger = scMaxTime;
+    sc_time localTime;
     for (auto& it : bankMachines)
     {
         it->evaluate();

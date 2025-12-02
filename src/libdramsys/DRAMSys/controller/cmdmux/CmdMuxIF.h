@@ -55,8 +55,6 @@ public:
     virtual ~CmdMuxIF() = default;
 
     virtual std::optional<CommandTuple::Type> selectCommand(const ReadyCommands& readyCommands) = 0;
-    virtual sc_core::sc_time getGapTime() { return sc_core::sc_max_time(); }
-    virtual void resetGapTime() {}
 };
 
 } // namespace DRAMSys
