@@ -99,6 +99,7 @@ protected:
     sendToFrontend(tlm::tlm_generic_payload& trans, tlm::tlm_phase& phase, sc_core::sc_time& delay);
 
     virtual void controllerMethod();
+    virtual void dataRespThread();
     void recordBufferDepth();
 
     const McConfig& config;

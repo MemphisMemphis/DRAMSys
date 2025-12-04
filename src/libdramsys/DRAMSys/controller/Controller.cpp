@@ -113,7 +113,9 @@ Controller::Controller(const sc_module_name& name,
     }
 
     SC_METHOD(controllerMethod);
-    sensitive << beginReqEvent << endRespEvent << controllerEvent << dataResponseEvent;
+    sensitive << beginReqEvent << controllerEvent;
+
+    SC_THREAD(dataRespThread);
 
     tSocket.register_nb_transport_fw(this, &Controller::nb_transport_fw);
     tSocket.register_transport_dbg(this, &Controller::transport_dbg);
@@ -376,7 +378,8 @@ void Controller::controllerMethod()
     if (isFullCycle(sc_time_stamp(), memSpec.tCK))
     {
         // (1) Finish last response (END_RESP) and start new response (BEGIN_RESP)
-        manageResponses();
+        // handle in dataRespThread()
+        // manageResponses();
 
         // (2) Insert new request into scheduler and send END_REQ or use backpressure
         manageRequests(SC_ZERO_TIME);
@@ -538,6 +541,19 @@ void Controller::controllerMethod()
 
     if (timeForNextTrigger != scMaxTime)
         controllerEvent.notify(timeForNextTrigger - sc_time_stamp());
+}
+
+/*
+ * dataResponse Thread
+ */
+void Controller::dataRespThread() {
+  while (true) {
+    wait(dataResponseEvent | endRespEvent);
+    if (isFullCycle(sc_time_stamp(), memSpec.tCK)) {
+      // (1) Finish last response (END_RESP) and start new response (BEGIN_RESP)
+      manageResponses();
+    }
+  }
 }
 
 tlm_sync_enum
