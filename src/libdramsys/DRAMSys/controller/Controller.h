@@ -99,7 +99,15 @@ protected:
     sendToFrontend(tlm::tlm_generic_payload& trans, tlm::tlm_phase& phase, sc_core::sc_time& delay);
 
     virtual void controllerMethod();
+
+    /* bankDataQueue: FIFO for data response.
+     * It's FIFO, and w/ delay 2 cycles for shared bank data.
+     * dataResponseThread will dequeue respQueue to bankDataQueue,
+     * and add 2 cycles delay for the same bank's data.
+     */
+    std::unique_ptr<RespQueueIF> bankDataQueue;
     virtual void dataRespThread();
+
     void recordBufferDepth();
 
     const McConfig& config;

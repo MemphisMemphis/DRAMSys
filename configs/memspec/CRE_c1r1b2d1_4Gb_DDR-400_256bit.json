@@ -31,7 +31,7 @@
         },
         "memtimingspec": {
             "AL": 0,
-            "CCD": 6,
+            "CCD": 4,
             "CKE": 3,
             "CKESR": 4,
             "CL": 5,

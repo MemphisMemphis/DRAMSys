@@ -64,7 +64,7 @@ sc_time RespQueueFifo::getTriggerTime() const
     if (!buffer.empty())
     {
         sc_time triggerTime = buffer.front().second;
-        if (triggerTime > sc_time_stamp())
+        if (triggerTime >= sc_time_stamp())
             return triggerTime;
     }
     return scMaxTime;

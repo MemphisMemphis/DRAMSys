@@ -115,6 +115,7 @@ Controller::Controller(const sc_module_name& name,
     SC_METHOD(controllerMethod);
     sensitive << beginReqEvent << controllerEvent;
 
+    bankDataQueue = std::make_unique<RespQueueFifo>();
     SC_THREAD(dataRespThread);
 
     tSocket.register_nb_transport_fw(this, &Controller::nb_transport_fw);
@@ -678,6 +679,16 @@ void Controller::manageRequests(const sc_time& delay)
 
 void Controller::manageResponses()
 {
+    // check bankDataQueue first
+    sc_time sc_current = sc_time_stamp();
+    if (sc_current == bankDataQueue->getTriggerTime()) {
+        transToRelease.payload = bankDataQueue->nextPayload();
+        tlm_phase bwPhase = BEGIN_RESP;
+        sc_time bwDelay = SC_ZERO_TIME;
+        sendToFrontend(*transToRelease.payload, bwPhase, bwDelay);
+        transToRelease.arrival = scMaxTime;
+    }
+
     if (transToRelease.payload != nullptr)
     {
         assert(transToRelease.arrival >= sc_time_stamp());
@@ -701,6 +712,8 @@ void Controller::manageResponses()
             return; // END_RESP not completed
     }
 
+    PayloadAndArrival transToResponse;
+
     tlm_generic_payload* nextTransInRespQueue = respQueue->nextPayload();
     if (nextTransInRespQueue != nullptr)
     {
@@ -720,12 +733,15 @@ void Controller::manageResponses()
                 ChildExtension::getParentTrans(*nextTransInRespQueue);
             if (ParentExtension::notifyChildTransCompletion(parentTrans))
             {
-                transToRelease.payload = &parentTrans;
-                tlm_phase bwPhase = BEGIN_RESP;
-                sc_time bwDelay = SC_ZERO_TIME;
-
-                sendToFrontend(*transToRelease.payload, bwPhase, bwDelay);
-                transToRelease.arrival = scMaxTime;
+                transToResponse.payload = &parentTrans;
+                sc_time data_response_time = sc_current;
+                /*
+                 * Simple test for 2 banks share 1 data path.
+                 * There is 2 cycles delay to switch off to next bank.
+                 */
+                data_response_time = data_response_time + 2 * memSpec.tCK;
+                bankDataQueue->insertPayload(transToResponse.payload, data_response_time);
+                dataResponseEvent.notify(data_response_time - sc_time_stamp());
             }
             else
             {
