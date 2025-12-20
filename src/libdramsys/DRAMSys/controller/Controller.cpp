@@ -112,10 +112,11 @@ Controller::Controller(const sc_module_name& name,
         windowEvent.notify(windowSizeTime);
     }
 
-    SC_METHOD(controllerMethod);
-    sensitive << beginReqEvent << controllerEvent;
+    SC_THREAD(controllerThread);
 
     bankDataQueue = std::make_unique<RespQueueFifo>();
+
+    SC_THREAD(dataReqThread);
     SC_THREAD(dataRespThread);
 
     tSocket.register_nb_transport_fw(this, &Controller::nb_transport_fw);
@@ -383,7 +384,8 @@ void Controller::controllerMethod()
         // manageResponses();
 
         // (2) Insert new request into scheduler and send END_REQ or use backpressure
-        manageRequests(SC_ZERO_TIME);
+        // handled in dataReqThread()
+        //manageRequests(SC_ZERO_TIME);
     }
 
     // (3) Start refresh and power-down managers to issue requests for the current time
@@ -469,7 +471,8 @@ void Controller::controllerMethod()
             if (command.isCasCommand())
             {
                 scheduler->removeRequest(*trans);
-                manageRequests(config.thinkDelayFw);
+                beginReqEvent.notify(SC_ZERO_TIME);
+                // manageRequests(config.thinkDelayFw);
                 respQueue->insertPayload(trans,
                                          sc_time_stamp() + config.phyDelayFw +
                                              memSpec.getIntervalOnDataStrobe(command, *trans).end +
@@ -544,6 +547,24 @@ void Controller::controllerMethod()
         controllerEvent.notify(timeForNextTrigger - sc_time_stamp());
 }
 
+void Controller::controllerThread() {
+  while (true) {
+    wait(controllerEvent);
+    controllerMethod();
+  }
+}
+
+/* BEGIN_REQUEST phase handler thread in nb_transport_fw() socket */
+void Controller::dataReqThread() {
+  while (true) {
+    wait(beginReqEvent);
+    manageRequests(config.thinkDelayFw);
+
+    // trigger controllermethod()
+    controllerEvent.notify(SC_ZERO_TIME);
+  }
+}
+
 /*
  * dataResponse Thread
  */
@@ -564,7 +585,7 @@ Controller::nb_transport_fw(tlm_generic_payload& trans, tlm_phase& phase, sc_tim
     {
         transToAcquire.payload = &trans;
         transToAcquire.arrival = sc_time_stamp() + delay + config.thinkDelayFw;
-        beginReqEvent.notify(delay + config.thinkDelayFw);
+        beginReqEvent.notify(delay/* + config.thinkDelayFw*/);
     }
     else if (phase == END_RESP)
     {

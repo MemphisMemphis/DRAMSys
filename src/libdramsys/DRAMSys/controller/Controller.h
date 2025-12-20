@@ -100,12 +100,20 @@ protected:
 
     virtual void controllerMethod();
 
+    /* call controllerMethod */
+    virtual void controllerThread();
+
     /* bankDataQueue: FIFO for data response.
      * It's FIFO, and w/ delay 2 cycles for shared bank data.
      * dataResponseThread will dequeue respQueue to bankDataQueue,
      * and add 2 cycles delay for the same bank's data.
      */
     std::unique_ptr<RespQueueIF> bankDataQueue;
+
+    /* BEGIN_REQUEST phase handler thread in nb_transport_fw() socket */
+    virtual void dataReqThread();
+
+    /* BEGIN_RESPOSE phase handler thread in nb_transport_fw() socket */
     virtual void dataRespThread();
 
     void recordBufferDepth();
