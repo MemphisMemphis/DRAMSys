@@ -558,7 +558,7 @@ void Controller::controllerThread() {
 void Controller::dataReqThread() {
   while (true) {
     wait(beginReqEvent);
-    manageRequests(config.thinkDelayFw);
+    manageRequests(SC_ZERO_TIME);
 
     // trigger controllermethod()
     controllerEvent.notify(SC_ZERO_TIME);
@@ -585,7 +585,7 @@ Controller::nb_transport_fw(tlm_generic_payload& trans, tlm_phase& phase, sc_tim
     {
         transToAcquire.payload = &trans;
         transToAcquire.arrival = sc_time_stamp() + delay + config.thinkDelayFw;
-        beginReqEvent.notify(delay/* + config.thinkDelayFw*/);
+        beginReqEvent.notify(delay + config.thinkDelayFw);
     }
     else if (phase == END_RESP)
     {
