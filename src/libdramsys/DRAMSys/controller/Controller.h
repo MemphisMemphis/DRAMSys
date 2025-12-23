@@ -159,6 +159,8 @@ protected:
 
     void manageResponses();
     void manageRequests(const sc_core::sc_time& delay);
+    /* flag of call manageRequests() with ThinkedDelay after sheduler->removeRequest() */
+    bool flag_RemoveReqest = false;
 
     sc_core::sc_event beginReqEvent, endRespEvent, controllerEvent, dataResponseEvent;
 

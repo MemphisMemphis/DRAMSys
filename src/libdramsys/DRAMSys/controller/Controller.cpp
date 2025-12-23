@@ -471,6 +471,7 @@ void Controller::controllerMethod()
             if (command.isCasCommand())
             {
                 scheduler->removeRequest(*trans);
+                flag_RemoveReqest = true;
                 beginReqEvent.notify(SC_ZERO_TIME);
                 // manageRequests(config.thinkDelayFw);
                 respQueue->insertPayload(trans,
@@ -558,7 +559,13 @@ void Controller::controllerThread() {
 void Controller::dataReqThread() {
   while (true) {
     wait(beginReqEvent);
-    manageRequests(SC_ZERO_TIME);
+
+    if (flag_RemoveReqest) {
+      manageRequests(config.thinkDelayFw);
+      flag_RemoveReqest = false;
+    } else {
+      manageRequests(SC_ZERO_TIME);
+    }
 
     // trigger controllermethod()
     controllerEvent.notify(SC_ZERO_TIME);
