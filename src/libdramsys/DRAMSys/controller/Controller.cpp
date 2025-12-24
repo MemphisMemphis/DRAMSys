@@ -471,9 +471,8 @@ void Controller::controllerMethod()
             if (command.isCasCommand())
             {
                 scheduler->removeRequest(*trans);
-                flag_RemoveReqest = true;
-                beginReqEvent.notify(SC_ZERO_TIME);
-                // manageRequests(config.thinkDelayFw);
+                removeReqEvent.notify(SC_ZERO_TIME);
+
                 respQueue->insertPayload(trans,
                                          sc_time_stamp() + config.phyDelayFw +
                                              memSpec.getIntervalOnDataStrobe(command, *trans).end +
@@ -559,16 +558,23 @@ void Controller::controllerThread() {
 void Controller::dataReqThread() {
   while (true) {
     wait(beginReqEvent);
-
-    if (flag_RemoveReqest) {
-      manageRequests(config.thinkDelayFw);
-      flag_RemoveReqest = false;
-    } else {
+    if (isFullCycle(sc_time_stamp(), memSpec.tCK)) {
       manageRequests(SC_ZERO_TIME);
     }
 
     // trigger controllermethod()
     controllerEvent.notify(SC_ZERO_TIME);
+  }
+}
+
+void Controller::removeReqThread() {
+  while (true) {
+    wait(removeReqEvent);
+
+    manageRequests(config.thinkDelayFw);
+
+    // trigger controllermethod()
+    //controllerEvent.notify(SC_ZERO_TIME);
   }
 }
 

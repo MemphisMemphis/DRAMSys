@@ -113,6 +113,9 @@ protected:
     /* BEGIN_REQUEST phase handler thread in nb_transport_fw() socket */
     virtual void dataReqThread();
 
+    /* waiting for removeReqEvent */
+    virtual void removeReqThread();
+
     /* BEGIN_RESPOSE phase handler thread in nb_transport_fw() socket */
     virtual void dataRespThread();
 
@@ -159,10 +162,12 @@ protected:
 
     void manageResponses();
     void manageRequests(const sc_core::sc_time& delay);
-    /* flag of call manageRequests() with ThinkedDelay after sheduler->removeRequest() */
-    bool flag_RemoveReqest = false;
 
     sc_core::sc_event beginReqEvent, endRespEvent, controllerEvent, dataResponseEvent;
+    /* After scheduler remove a Request, notify this event
+     * to call manageRequests() with thinkDelayFw time.
+     */
+    sc_core::sc_event removeReqEvent;
 
     const unsigned minBytesPerBurst;
     const unsigned maxBytesPerBurst;
