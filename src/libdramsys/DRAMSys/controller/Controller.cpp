@@ -119,6 +119,8 @@ Controller::Controller(const sc_module_name& name,
     SC_THREAD(dataReqThread);
     SC_THREAD(dataRespThread);
 
+    SC_THREAD(removeReqThread);
+
     tSocket.register_nb_transport_fw(this, &Controller::nb_transport_fw);
     tSocket.register_transport_dbg(this, &Controller::transport_dbg);
     tSocket.register_b_transport(this, &Controller::b_transport);
