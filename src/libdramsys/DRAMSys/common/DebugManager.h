@@ -44,6 +44,7 @@
 #else
 #define PRINTDEBUGMESSAGE(sender, message)                                                         \
     DebugManager::getInstance().printDebugMessage(sender, message)
+#define AD(trans) std::to_string(trans.get_address())
 
 #include <fstream>
 #include <string>

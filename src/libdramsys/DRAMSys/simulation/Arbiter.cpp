@@ -173,7 +173,7 @@ Arbiter::nb_transport_fw(int id, tlm_generic_payload& trans, tlm_phase& phase, s
     }
 
     PRINTDEBUGMESSAGE(name(),
-                      "[fw] " + getPhaseName(phase) + " notification in " + notDelay.to_string());
+                      "[fw] " + getPhaseName(phase) + " notification in " + notDelay.to_string() + AD(trans));
     payloadEventQueue.notify(trans, phase, notDelay);
     return TLM_ACCEPTED;
 }
@@ -184,7 +184,7 @@ tlm_sync_enum Arbiter::nb_transport_bw([[maybe_unused]] int id,
                                        sc_time& bwDelay)
 {
     PRINTDEBUGMESSAGE(name(),
-                      "[bw] " + getPhaseName(phase) + " notification in " + bwDelay.to_string());
+                      "[bw] " + getPhaseName(phase) + " notification in " + bwDelay.to_string() + AD(payload));
     payloadEventQueue.notify(payload, phase, bwDelay);
     return TLM_ACCEPTED;
 }

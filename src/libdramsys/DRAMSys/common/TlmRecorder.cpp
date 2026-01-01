@@ -264,7 +264,7 @@ void TlmRecorder::introduceTransactionToSystem(tlm_generic_payload& trans)
     PRINTDEBUGMESSAGE(name,
                       "New transaction #" + std::to_string(totalNumTransactions) +
                           " generation time " +
-                          currentTransactionsInSystem.at(&trans).timeOfGeneration.to_string());
+                          currentTransactionsInSystem.at(&trans).timeOfGeneration.to_string() + AD(trans));
 }
 
 void TlmRecorder::removeTransactionFromSystem(tlm_generic_payload& trans)
@@ -272,7 +272,7 @@ void TlmRecorder::removeTransactionFromSystem(tlm_generic_payload& trans)
     assert(currentTransactionsInSystem.count(&trans) != 0);
 
     PRINTDEBUGMESSAGE(
-        name, "Removing transaction #" + std::to_string(currentTransactionsInSystem.at(&trans).id));
+        name, "Removing transaction #" + std::to_string(currentTransactionsInSystem.at(&trans).id) + AD(trans));
 
     Transaction& recordingData = currentTransactionsInSystem.at(&trans);
     currentDataBuffer->push_back(recordingData);

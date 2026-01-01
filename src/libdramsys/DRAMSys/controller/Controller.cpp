@@ -612,7 +612,7 @@ Controller::nb_transport_fw(tlm_generic_payload& trans, tlm_phase& phase, sc_tim
                         "nb_transport_fw in controller was triggered with unknown phase");
 
     PRINTDEBUGMESSAGE(name(),
-                      "[fw] " + getPhaseName(phase) + " notification in " + delay.to_string());
+                      "[fw] " + getPhaseName(phase) + " notification in " + delay.to_string() + AD(trans));
 
     return TLM_ACCEPTED;
 }
