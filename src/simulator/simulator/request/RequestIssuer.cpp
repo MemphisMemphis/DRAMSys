@@ -96,6 +96,10 @@ void RequestIssuer::sendNextRequest()
     }
 
     delay = sendingTime - sc_core::sc_time_stamp();
+
+    // make sure no zero delay for each request.
+    if (sc_core::SC_ZERO_TIME == delay) delay = interfaceClk;
+
     LOG_SC(request);
     iSocket->nb_transport_fw(payload, phase, delay);
 
