@@ -208,7 +208,7 @@ protected:
         {
             if (isIdle)
             {
-                PRINTDEBUGMESSAGE("IdleTimeCollector", "IDLE end");
+                PRINTDEBUGMESSAGE("IdleTimeCollector", "IDLE end" + (sc_core::sc_time_stamp() - idleStart).to_string());
                 idleTime += sc_core::sc_time_stamp() - idleStart;
                 isIdle = false;
             }
