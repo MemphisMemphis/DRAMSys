@@ -9,7 +9,7 @@
             {
                 "type": "player",
                 "clkMhz": 400,
-                "name": "traces/1024_random_28bits.stl"
+                "name": "traces/1024_read_28bits.stl"
             }
         ]
     }
