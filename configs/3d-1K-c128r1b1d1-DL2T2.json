@@ -1,0 +1,91 @@
+{
+    "simulation": {
+        "addressmapping": "addressmapping/cre_1K_c128r1b1d1_1Mbx256_DL2T2_crbc.json",
+        "mcconfig": "mcconfig/3d_fr_fcfs.json",
+        "memspec": "memspec/CRE_1K_c128r1b1d1_4Gb_DDR-400_256bit.json",
+        "simconfig": "simconfig/cre_DL2T2.json",
+        "simulationid": "3d-1K-c128r1b1d1-DL2T2",
+        "tracesetup": [
+            {
+                "type": "player",
+                "clkMhz": 400,
+                "name": "traces/1024_read_28bits0.stl"
+            },
+            {
+                "type": "player",
+                "clkMhz": 400,
+                "name": "traces/1024_read_28bits1.stl"
+            },
+            {
+                "type": "player",
+                "clkMhz": 400,
+                "name": "traces/1024_read_28bits2.stl"
+            },
+            {
+                "type": "player",
+                "clkMhz": 400,
+                "name": "traces/1024_read_28bits3.stl"
+            },
+            {
+                "type": "player",
+                "clkMhz": 400,
+                "name": "traces/1024_read_28bits4.stl"
+            },
+            {
+                "type": "player",
+                "clkMhz": 400,
+                "name": "traces/1024_read_28bits5.stl"
+            },
+            {
+                "type": "player",
+                "clkMhz": 400,
+                "name": "traces/1024_read_28bits6.stl"
+            },
+            {
+                "type": "player",
+                "clkMhz": 400,
+                "name": "traces/1024_read_28bits7.stl"
+            },
+            {
+                "type": "player",
+                "clkMhz": 400,
+                "name": "traces/1024_read_28bits8.stl"
+            },
+            {
+                "type": "player",
+                "clkMhz": 400,
+                "name": "traces/1024_read_28bits9.stl"
+            },
+            {
+                "type": "player",
+                "clkMhz": 400,
+                "name": "traces/1024_read_28bits10.stl"
+            },
+            {
+                "type": "player",
+                "clkMhz": 400,
+                "name": "traces/1024_read_28bits11.stl"
+            },
+            {
+                "type": "player",
+                "clkMhz": 400,
+                "name": "traces/1024_read_28bits12.stl"
+            },
+            {
+                "type": "player",
+                "clkMhz": 400,
+                "name": "traces/1024_read_28bits13.stl"
+            },
+            {
+                "type": "player",
+                "clkMhz": 400,
+                "name": "traces/1024_read_28bits14.stl"
+            },
+            {
+                "type": "player",
+                "clkMhz": 400,
+                "name": "traces/1024_read_28bits15.stl"
+            }                        
+        ]
+    }
+}
