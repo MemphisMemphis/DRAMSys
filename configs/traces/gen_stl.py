@@ -4,8 +4,8 @@ import random
 burst_len = 32*32
 
 # max address space / file address space / block address space
-max_address_bit = 32    
-file_address_bit = 28
+max_address_bit = 29    
+file_address_bit = 29
 block_address_bit = 28
 
 if not ((max_address_bit >= file_address_bit) and (file_address_bit >= block_address_bit)) :
@@ -31,7 +31,8 @@ for file_index in range(max_space//file_space):
                 print('%d: (%d) read 0x%x' % (index, burst_len, addr), file = trace_file);
                 addr += burst_len;
                 random_addr = random.randint(0, block_space/burst_len) * burst_len + block_offset + file_offset
-                print('%d: (%d) read 0x%x' % (index, burst_len, random_addr), file = random_file)
+                print_str = '%d: (%d) ' + random.choice(['read', 'write']) + ' 0x%x'
+                print(print_str % (index, burst_len, random_addr), file = random_file)
                 index += 1
     
     trace_file.close()
