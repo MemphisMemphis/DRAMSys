@@ -157,14 +157,14 @@ void CheckerDDR3::insert(Command command, const tlm_generic_payload& payload)
         
         // Rank (RD,RD) memSpec.tCCD [] SameComponent()
         {
-            const sc_time constraint = currentTime + memSpec.tCCD;
+            const sc_time constraint = currentTime + memSpec.tCCD + 2 * memSpec.tCK;
             sc_time &earliestTimeToStart = nextCommandByRank[Command::RD][rank];
             earliestTimeToStart = std::max(earliestTimeToStart, constraint);
         }
         
         // Rank (RD,RDA) memSpec.tCCD [] SameComponent()
         {
-            const sc_time constraint = currentTime + memSpec.tCCD;
+            const sc_time constraint = currentTime + memSpec.tCCD + 2 * memSpec.tCK;
             sc_time &earliestTimeToStart = nextCommandByRank[Command::RDA][rank];
             earliestTimeToStart = std::max(earliestTimeToStart, constraint);
         }
