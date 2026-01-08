@@ -64,6 +64,7 @@
 #include "DRAMSys/controller/scheduler/SchedulerFrFcfs.h"
 #include "DRAMSys/controller/scheduler/SchedulerFrFcfsGrp.h"
 #include "DRAMSys/controller/scheduler/SchedulerGrpFrFcfs.h"
+#include "DRAMSys/controller/scheduler/SchedulerAgedGrpFrFcfs.h"
 #include "DRAMSys/controller/scheduler/SchedulerGrpFrFcfsWm.h"
 
 #include <cstdint>
@@ -209,6 +210,8 @@ Controller::Controller(const sc_module_name& name,
         scheduler = std::make_unique<SchedulerFrFcfsGrp>(config, memSpec);
     else if (config.scheduler == Config::SchedulerType::GrpFrFcfs)
         scheduler = std::make_unique<SchedulerGrpFrFcfs>(config, memSpec);
+    else if (config.scheduler == Config::SchedulerType::AgedGrpFrFcfs)
+            scheduler = std::make_unique<SchedulerAgedGrpFrFcfs>(config, memSpec);
     else if (config.scheduler == Config::SchedulerType::GrpFrFcfsWm)
         scheduler = std::make_unique<SchedulerGrpFrFcfsWm>(config, memSpec);
 

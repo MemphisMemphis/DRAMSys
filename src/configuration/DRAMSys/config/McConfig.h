@@ -67,6 +67,7 @@ enum class SchedulerType
     FrFcfs,
     FrFcfsGrp,
     GrpFrFcfs,
+    AgedGrpFrFcfs,
     GrpFrFcfsWm,
     Invalid = -1
 };
@@ -77,6 +78,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SchedulerType,
                               {SchedulerType::FrFcfs, "FrFcfs"},
                               {SchedulerType::FrFcfsGrp, "FrFcfsGrp"},
                               {SchedulerType::GrpFrFcfs, "GrpFrFcfs"},
+                              {SchedulerType::AgedGrpFrFcfs, "AgedGrpFrFcfs"},
                               {SchedulerType::GrpFrFcfsWm, "GrpFrFcfsWm"}})
 
 enum class SchedulerBufferType
