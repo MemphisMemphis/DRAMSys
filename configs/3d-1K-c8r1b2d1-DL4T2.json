@@ -9,7 +9,7 @@
             {
                 "type": "player",
                 "clkMhz": 400,
-                "name": "traces/1024_random_29bits0.stl"
+                "name": "traces/row_miss_starvation.stl"
             }
         ]
     }
