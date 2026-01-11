@@ -86,7 +86,6 @@ add_library(libdramsys
     DRAMSys/controller/scheduler/SchedulerFrFcfs.cpp
     DRAMSys/controller/scheduler/SchedulerFrFcfsGrp.cpp
     DRAMSys/controller/scheduler/SchedulerGrpFrFcfs.cpp
-    DRAMSys/controller/scheduler/SchedulerAgedGrpFrFcfs.cpp
     DRAMSys/controller/scheduler/SchedulerGrpFrFcfsWm.cpp
     DRAMSys/simulation/AddressDecoder.cpp
     DRAMSys/simulation/Arbiter.cpp

@@ -39,6 +39,7 @@
 #include "DRAMSys/controller/BankMachine.h"
 #include "DRAMSys/controller/scheduler/BufferCounterIF.h"
 #include "DRAMSys/controller/scheduler/SchedulerIF.h"
+#include "DRAMSys/controller/scheduler/AgePayload.h"
 
 #include <list>
 #include <memory>
@@ -65,6 +66,35 @@ public:
 private:
     ControllerVector<Bank, std::list<tlm::tlm_generic_payload*>> readBuffer;
     ControllerVector<Bank, std::list<tlm::tlm_generic_payload*>> writeBuffer;
+    tlm::tlm_command lastCommand = tlm::TLM_READ_COMMAND;
+    std::unique_ptr<BufferCounterIF> bufferCounter;
+};
+
+class SchedulerAgeGrpFrFcfs final : public SchedulerIF
+{
+public:
+    explicit SchedulerAgeGrpFrFcfs(const McConfig& config, const MemSpec& memSpec);
+    [[nodiscard]] bool hasBufferSpace(unsigned entries) const override;
+    void storeRequest(tlm::tlm_generic_payload& payload) override;
+    void removeRequest(tlm::tlm_generic_payload& payload) override;
+    [[nodiscard]] tlm::tlm_generic_payload*
+    getNextRequest(const BankMachine& bankMachine) const override;
+    [[nodiscard]] bool
+    hasFurtherRowHit(Bank bank, Row row, tlm::tlm_command command) const override;
+    [[nodiscard]] bool hasFurtherRequest(Bank bank, tlm::tlm_command command) const override;
+    [[nodiscard]] const std::vector<unsigned>& getBufferDepth() const override;
+
+private:
+    static int toBufIdx(tlm::tlm_command command) {
+      sc_assert((tlm::TLM_READ_COMMAND == command) || (tlm::TLM_WRITE_COMMAND == command));
+      return (tlm::TLM_READ_COMMAND == command) ? 0 : 1;
+    }
+
+    mutable struct {
+      ControllerVector<Bank, std::list<AgePayload>> buffer;
+      AgeCounter age;
+    } grpBuffer[2];
+
     tlm::tlm_command lastCommand = tlm::TLM_READ_COMMAND;
     std::unique_ptr<BufferCounterIF> bufferCounter;
 };

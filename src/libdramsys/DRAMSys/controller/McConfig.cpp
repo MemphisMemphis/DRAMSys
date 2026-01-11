@@ -44,6 +44,7 @@ McConfig::McConfig(const Config::McConfig& config, const MemSpec& memSpec) :
     schedulerBuffer(config.SchedulerBuffer.value_or(DEFAULT_SCHEDULER_BUFFER)),
     lowWatermark(config.LowWatermark.value_or(DEFAULT_LOW_WATERMARK)),
     highWatermark(config.HighWatermark.value_or(DEFAULT_HIGH_WATERMARK)),
+    maxAgeWaited(config.MaxAgeWaited.value_or(DEFAULT_MAX_AGE_WAITED)),
     cmdMux(config.CmdMux.value_or(DEFAULT_CMD_MUX)),
     respQueue(config.RespQueue.value_or(DEFAULT_RESP_QUEUE)),
     arbiter(config.Arbiter.value_or(DEFAULT_ARBITER)),

@@ -55,6 +55,8 @@ struct McConfig
     unsigned int lowWatermark;
     unsigned int highWatermark;
 
+    unsigned int maxAgeWaited;
+
     Config::CmdMuxType cmdMux;
     Config::RespQueueType respQueue;
     Config::ArbiterType arbiter;
@@ -86,6 +88,7 @@ struct McConfig
         Config::SchedulerBufferType::Bankwise;
     static constexpr unsigned int DEFAULT_LOW_WATERMARK = 0;
     static constexpr unsigned int DEFAULT_HIGH_WATERMARK = 0;
+    static constexpr unsigned int DEFAULT_MAX_AGE_WAITED = 16;
     static constexpr Config::CmdMuxType DEFAULT_CMD_MUX = Config::CmdMuxType::Oldest;
     static constexpr Config::RespQueueType DEFAULT_RESP_QUEUE = Config::RespQueueType::Fifo;
     static constexpr Config::ArbiterType DEFAULT_ARBITER = Config::ArbiterType::Simple;

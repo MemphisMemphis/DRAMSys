@@ -206,4 +206,135 @@ const std::vector<unsigned>& SchedulerGrpFrFcfs::getBufferDepth() const
     return bufferCounter->getBufferDepth();
 }
 
+
+SchedulerAgeGrpFrFcfs::SchedulerAgeGrpFrFcfs(const McConfig& config, const MemSpec& memSpec)
+{
+    grpBuffer[0] = {ControllerVector<Bank, std::list<AgePayload>>(memSpec.banksPerChannel), AgeCounter(config.maxAgeWaited)};
+    grpBuffer[1] = {ControllerVector<Bank, std::list<AgePayload>>(memSpec.banksPerChannel), AgeCounter(config.maxAgeWaited)};
+
+    if (config.schedulerBuffer == Config::SchedulerBufferType::Bankwise)
+        bufferCounter = std::make_unique<BufferCounterBankwise>(config.requestBufferSize,
+                                                                memSpec.banksPerChannel);
+    else if (config.schedulerBuffer == Config::SchedulerBufferType::ReadWrite)
+        bufferCounter = std::make_unique<BufferCounterReadWrite>(config.requestBufferSizeRead,
+                                                                 config.requestBufferSizeWrite);
+    else if (config.schedulerBuffer == Config::SchedulerBufferType::Shared)
+        bufferCounter = std::make_unique<BufferCounterShared>(config.requestBufferSize);
+
+    SC_REPORT_WARNING("SchedulerAgeGrpFrFcfs", "Row-hit prefered on Read/Write queues with age counter.");
+}
+
+bool SchedulerAgeGrpFrFcfs::hasBufferSpace(unsigned entries) const
+{
+    return bufferCounter->hasBufferSpace(entries);
+}
+
+void SchedulerAgeGrpFrFcfs::storeRequest(tlm_generic_payload& payload)
+{
+  AgePayload trans = AgePayload(&payload);
+  int idx = toBufIdx(payload.get_command());
+  trans.set_born(grpBuffer[idx].age.get_year());
+  grpBuffer[idx].buffer[ControllerExtension::getBank(payload)].push_back(trans);
+
+  bufferCounter->storeRequest(payload);
+}
+
+void SchedulerAgeGrpFrFcfs::removeRequest(tlm_generic_payload& payload)
+{
+  bufferCounter->removeRequest(payload);
+  lastCommand = payload.get_command();
+  Bank bank = ControllerExtension::getBank(payload);
+
+  AgePayload trans = AgePayload(&payload);
+  grpBuffer[toBufIdx(payload.get_command())].buffer[bank].remove(trans);
+}
+
+//@jg 1-11
+using namespace std;
+
+tlm_generic_payload* SchedulerAgeGrpFrFcfs::getNextRequest(const BankMachine& bankMachine) const
+{
+  // search row hits, search wrd/wr hits
+  // search rd/wr hits, search row hits
+  Bank bank = bankMachine.getBank();
+
+  int idx = toBufIdx(lastCommand);
+
+  cout << "bank = " << int(bank) << ", idx = " << idx << endl;
+  cout << "year = " << grpBuffer[idx].age.get_year() << endl;
+  if (!grpBuffer[idx].buffer[bank].empty()) {
+    if (bankMachine.isActivated()) {
+      // Search for read row hit
+      Row openRow = bankMachine.getOpenRow();
+      //@jg 1-11
+      std::cout << "openRow = " << int(openRow) << std::endl;
+      for (auto it : grpBuffer[idx].buffer[bank]) {
+        if (it.is_ergent()) {
+          //cout << "is_ergent: A = " << tlm_generic_payload *(it)->get_address() << endl;
+          return it;
+        }
+        if (grpBuffer[idx].age.is_aged(it.get_born())) {
+          it.set_ergent(true);
+          cout << "set_ergent.\n";
+        }
+        if (ControllerExtension::getRow(*it) == openRow) {
+          //cout << "row-hit: A = " << (tlm_generic_payload *)(it)->get_address() << endl;
+          grpBuffer[idx].age.ageInc();
+          cout << "year++\n";
+          return it;
+        }
+      }
+    }
+    // No row hit found or bank precharged
+    return grpBuffer[idx].buffer[bank].front();
+  }
+
+  return nullptr;
+}
+
+bool SchedulerAgeGrpFrFcfs::hasFurtherRowHit(Bank bank, Row row, tlm_command command) const
+{
+    // TODO: do this based on current RD/WR mode
+    unsigned rowHitCounter = 0;
+    if (command == tlm::TLM_READ_COMMAND)
+    {
+        for (auto it : grpBuffer[0].buffer[bank])
+        {
+            if (ControllerExtension::getRow(*it) == row)
+            {
+                rowHitCounter++;
+                if (rowHitCounter == 2)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    for (auto it : grpBuffer[1].buffer[bank])
+    {
+        if (ControllerExtension::getRow(*it) == row)
+        {
+            rowHitCounter++;
+            if (rowHitCounter == 2)
+                return true;
+        }
+    }
+
+    return false;
+}
+
+bool SchedulerAgeGrpFrFcfs::hasFurtherRequest(Bank bank, tlm_command command) const
+{
+    if (command == tlm::TLM_READ_COMMAND)
+    {
+        return grpBuffer[0].buffer[bank].size() >= 2;
+    }
+
+    return grpBuffer[1].buffer[bank].size() >= 2;
+}
+
+const std::vector<unsigned>& SchedulerAgeGrpFrFcfs::getBufferDepth() const
+{
+    return bufferCounter->getBufferDepth();
+}
 } // namespace DRAMSys

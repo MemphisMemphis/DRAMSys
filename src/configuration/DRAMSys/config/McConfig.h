@@ -67,7 +67,7 @@ enum class SchedulerType
     FrFcfs,
     FrFcfsGrp,
     GrpFrFcfs,
-    AgedGrpFrFcfs,
+    AgeGrpFrFcfs,
     GrpFrFcfsWm,
     Invalid = -1
 };
@@ -78,7 +78,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(SchedulerType,
                               {SchedulerType::FrFcfs, "FrFcfs"},
                               {SchedulerType::FrFcfsGrp, "FrFcfsGrp"},
                               {SchedulerType::GrpFrFcfs, "GrpFrFcfs"},
-                              {SchedulerType::AgedGrpFrFcfs, "AgedGrpFrFcfs"},
+                              {SchedulerType::AgeGrpFrFcfs, "AgeGrpFrFcfs"},
                               {SchedulerType::GrpFrFcfsWm, "GrpFrFcfsWm"}})
 
 enum class SchedulerBufferType
@@ -177,6 +177,7 @@ struct McConfig
     std::optional<SchedulerType> Scheduler;
     std::optional<unsigned int> HighWatermark;
     std::optional<unsigned int> LowWatermark;
+    std::optional<unsigned int> MaxAgeWaited;
     std::optional<SchedulerBufferType> SchedulerBuffer;
     std::optional<unsigned int> RequestBufferSize;
     std::optional<unsigned int> RequestBufferSizeRead;
@@ -205,6 +206,7 @@ NLOHMANN_JSONIFY_ALL_THINGS(McConfig,
                             Scheduler,
                             HighWatermark,
                             LowWatermark,
+                            MaxAgeWaited,
                             SchedulerBuffer,
                             RequestBufferSize,
                             RequestBufferSizeRead,
