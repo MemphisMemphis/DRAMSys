@@ -2,7 +2,7 @@
     "mcconfig": {
         "PagePolicy": "Open",
         "Scheduler": "AgeGrpFrFcfs",
-        "MaxAgeWaited": 8,
+        "MaxAgeWaited": 16,
         "SchedulerBuffer": "ReadWrite",
         "RequestBufferSizeRead": 16,
         "RequestBufferSizeWrite": 16,
