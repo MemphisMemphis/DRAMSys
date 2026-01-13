@@ -84,16 +84,22 @@ public:
     [[nodiscard]] bool hasFurtherRequest(Bank bank, tlm::tlm_command command) const override;
     [[nodiscard]] const std::vector<unsigned>& getBufferDepth() const override;
 
+    enum BufIndex {
+      READ_COMMAND = 0,
+      WRITE_COMMAND = 1,
+      MAX_BufIndex
+    };
+
 private:
-    static int toBufIdx(tlm::tlm_command command) {
+    static BufIndex toBufIdx(tlm::tlm_command command) {
       sc_assert((tlm::TLM_READ_COMMAND == command) || (tlm::TLM_WRITE_COMMAND == command));
-      return (tlm::TLM_READ_COMMAND == command) ? 0 : 1;
+      return (tlm::TLM_READ_COMMAND == command) ? READ_COMMAND : WRITE_COMMAND;
     }
 
     mutable struct {
       ControllerVector<Bank, std::list<AgePayload>> buffer;
-      AgeCounter age;
-    } grpBuffer[2];
+      ControllerVector<Bank, AgeCounter> age;
+    } grpBuffer[MAX_BufIndex];
 
     tlm::tlm_command lastCommand = tlm::TLM_READ_COMMAND;
     std::unique_ptr<BufferCounterIF> bufferCounter;

@@ -34,8 +34,12 @@
 #pragma once
 
 #include <tlm>
+#include <ostream>
+#include <sstream>
+#include "DRAMSys/common/DebugManager.h"
 
 using namespace tlm;
+using namespace std;
 
 namespace DRAMSys
 {
@@ -105,8 +109,47 @@ class AgePayload {
     ergent = false;
   }
 
+/*
+  AgePayload(const AgePayload& tran) {
+    payload = tran.payload;
+    born = tran.born;
+    ergent = tran.ergent;
+    stringstream ss;
+    ss << *this;
+    PRINTDEBUGMESSAGE("AgePayload(const tran)", ss.str());
+  }
+
+  ~AgePayload() {
+    stringstream ss;
+    ss << *this;
+    PRINTDEBUGMESSAGE("~AgePayload()", ss.str());
+  }
+*/
   operator tlm_generic_payload *() const {
     return payload;
+  }
+
+  bool operator == (const AgePayload& other) const {
+    return payload == other.payload;
+  }
+
+  friend bool operator == (const AgePayload& left, const AgePayload& right) {
+    return left.operator ==(right);
+  }
+
+  bool operator != (const AgePayload& other) const {
+    return payload != other.payload;
+  }
+
+  friend bool operator != (const AgePayload& left, const AgePayload& right) {
+    return left.operator ==(right);
+  }
+
+  friend ostream& operator << (ostream& os, const AgePayload& tran) {
+    os << "AgePayload:{" << hex << long(tran.payload) << "(" << tran.payload->get_address() << "),"
+        << tran.born << ","
+        << tran.ergent << "}.";
+    return os;
   }
 
   void set_born(int now) { born = now; }

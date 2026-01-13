@@ -209,8 +209,8 @@ const std::vector<unsigned>& SchedulerGrpFrFcfs::getBufferDepth() const
 
 SchedulerAgeGrpFrFcfs::SchedulerAgeGrpFrFcfs(const McConfig& config, const MemSpec& memSpec)
 {
-    grpBuffer[0] = {ControllerVector<Bank, std::list<AgePayload>>(memSpec.banksPerChannel), AgeCounter(config.maxAgeWaited)};
-    grpBuffer[1] = {ControllerVector<Bank, std::list<AgePayload>>(memSpec.banksPerChannel), AgeCounter(config.maxAgeWaited)};
+    grpBuffer[READ_COMMAND] = {ControllerVector<Bank, std::list<AgePayload>>(memSpec.banksPerChannel), ControllerVector<Bank, AgeCounter>(memSpec.banksPerChannel, config.maxAgeWaited)};
+    grpBuffer[WRITE_COMMAND] = {ControllerVector<Bank, std::list<AgePayload>>(memSpec.banksPerChannel), ControllerVector<Bank, AgeCounter>(memSpec.banksPerChannel, config.maxAgeWaited)};
 
     if (config.schedulerBuffer == Config::SchedulerBufferType::Bankwise)
         bufferCounter = std::make_unique<BufferCounterBankwise>(config.requestBufferSize,
@@ -232,25 +232,36 @@ bool SchedulerAgeGrpFrFcfs::hasBufferSpace(unsigned entries) const
 void SchedulerAgeGrpFrFcfs::storeRequest(tlm_generic_payload& payload)
 {
   AgePayload trans = AgePayload(&payload);
-  int idx = toBufIdx(payload.get_command());
-  trans.set_born(grpBuffer[idx].age.get_year());
-  grpBuffer[idx].buffer[ControllerExtension::getBank(payload)].push_back(trans);
+  auto idx = toBufIdx(payload.get_command());
+  Bank bank = ControllerExtension::getBank(payload);
+  trans.set_born(grpBuffer[idx].age[bank].get_year());
+  grpBuffer[idx].buffer[bank].push_back(trans);
 
   bufferCounter->storeRequest(payload);
+  {
+    stringstream ss;
+    ss << trans;
+    PRINTDEBUGMESSAGE("storeRequest():", ss.str());
+  }
 }
 
 void SchedulerAgeGrpFrFcfs::removeRequest(tlm_generic_payload& payload)
 {
   bufferCounter->removeRequest(payload);
   lastCommand = payload.get_command();
+  auto idx = toBufIdx(payload.get_command());
   Bank bank = ControllerExtension::getBank(payload);
 
   AgePayload trans = AgePayload(&payload);
-  grpBuffer[toBufIdx(payload.get_command())].buffer[bank].remove(trans);
+  grpBuffer[idx].buffer[bank].remove(trans);
+  grpBuffer[idx].age[bank].ageInc();
+  {
+    stringstream ss;
+    ss << trans << endl
+        << "age[" << int(bank) << "] ++";
+    PRINTDEBUGMESSAGE("removeRequest():", ss.str());
+  }
 }
-
-//@jg 1-11
-using namespace std;
 
 tlm_generic_payload* SchedulerAgeGrpFrFcfs::getNextRequest(const BankMachine& bankMachine) const
 {
@@ -258,29 +269,25 @@ tlm_generic_payload* SchedulerAgeGrpFrFcfs::getNextRequest(const BankMachine& ba
   // search rd/wr hits, search row hits
   Bank bank = bankMachine.getBank();
 
-  int idx = toBufIdx(lastCommand);
+  auto idx = toBufIdx(lastCommand);
 
-  cout << "bank = " << int(bank) << ", idx = " << idx << endl;
-  cout << "year = " << grpBuffer[idx].age.get_year() << endl;
   if (!grpBuffer[idx].buffer[bank].empty()) {
     if (bankMachine.isActivated()) {
       // Search for read row hit
       Row openRow = bankMachine.getOpenRow();
-      //@jg 1-11
-      std::cout << "openRow = " << int(openRow) << std::endl;
-      for (auto it : grpBuffer[idx].buffer[bank]) {
+      for (auto& it : grpBuffer[idx].buffer[bank]) {
         if (it.is_ergent()) {
-          //cout << "is_ergent: A = " << tlm_generic_payload *(it)->get_address() << endl;
           return it;
         }
-        if (grpBuffer[idx].age.is_aged(it.get_born())) {
+        if (grpBuffer[idx].age[bank].is_aged(it.get_born())) {
           it.set_ergent(true);
-          cout << "set_ergent.\n";
+          {
+            stringstream ss;
+            ss << "set_ergent( " << it << ").";
+            PRINTDEBUGMESSAGE("getNextRequest():", ss.str());
+          }
         }
         if (ControllerExtension::getRow(*it) == openRow) {
-          //cout << "row-hit: A = " << (tlm_generic_payload *)(it)->get_address() << endl;
-          grpBuffer[idx].age.ageInc();
-          cout << "year++\n";
           return it;
         }
       }
