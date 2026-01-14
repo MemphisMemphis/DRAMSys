@@ -76,12 +76,12 @@ class AgeCounter {
   bool is_aged(int born) const {
     if (maxAge > 0) {
       int age;
-      if (year >= born) {
+      if (year > born) {
         age = year - born;
       } else {
         age = year + maxAge - born;
       }
-      return (age == (maxAge - 1));
+      return (age == maxAge);
     }
     return false;
   }

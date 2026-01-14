@@ -278,6 +278,7 @@ An example follows.
     - "FrFcfs": first-ready - first-come, first-served policy (row hits are preferred to row misses)
     - "FrFcfsGrp": first-ready - first-come, first-served policy with additional grouping of read and write requests
     - "GrpFrFcfs": grouping of read and write requests has higher priority than grouping of page hits (reverse of "FrFcfsGrp"), **experimental without hazard detection**
+    - "AgeGrpFrFcfs": grouping read/write requests with page hits avoid starvation counter *maxAgeWaited*
     - "GrpFrFcfsWm": "GrpFrFcfs" scheduler with watermarks to switch between read and write mode, **experimental without hazard detection**
 - *LowWatermark* (unsigned int), *HighWatermark* (unsigned int)
     - watermarks of "GrpFrFcfsWm" scheduler
@@ -287,6 +288,8 @@ An example follows.
     - "Shared": all requests are stored in one shared buffer (buffer depth is configured with parameter *RequestBufferSize*)
 - *RequestBufferSize* (unsigned int), *RequestBufferSizeRead* (unsigned int), *RequestBufferSizeWrite* (unsigned int)
     - depth of a single scheduler buffer entity, total buffer depth depends on the selected scheduler buffer policy
+- *maxAgeWaited* (unsigned int)
+    - maxium waited requests scheduled out
 - *CmdMux* (string)
     - "Oldest": from all commands that are ready to be issued in the current clock cycle the one that belongs to the oldest transaction has the highest priority; commands from refresh managers have a higher priority than all other commands, commands from power down managers have a lower priority than all other commands
     - "Strict": based on "Oldest", in addition, read and write commands are strictly issued in the order their corresponding requests arrived at the channel controller (can only be used in combination with the "Fifo" scheduler)

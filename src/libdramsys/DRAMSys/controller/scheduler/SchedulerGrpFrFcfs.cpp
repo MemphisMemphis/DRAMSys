@@ -238,11 +238,11 @@ void SchedulerAgeGrpFrFcfs::storeRequest(tlm_generic_payload& payload)
   grpBuffer[idx].buffer[bank].push_back(trans);
 
   bufferCounter->storeRequest(payload);
-  {
+ /* {
     stringstream ss;
     ss << trans;
     PRINTDEBUGMESSAGE("storeRequest():", ss.str());
-  }
+  }*/
 }
 
 void SchedulerAgeGrpFrFcfs::removeRequest(tlm_generic_payload& payload)
@@ -255,12 +255,12 @@ void SchedulerAgeGrpFrFcfs::removeRequest(tlm_generic_payload& payload)
   AgePayload trans = AgePayload(&payload);
   grpBuffer[idx].buffer[bank].remove(trans);
   grpBuffer[idx].age[bank].ageInc();
-  {
+ /* {
     stringstream ss;
     ss << trans << endl
         << "age[" << int(bank) << "] ++";
     PRINTDEBUGMESSAGE("removeRequest():", ss.str());
-  }
+  }*/
 }
 
 tlm_generic_payload* SchedulerAgeGrpFrFcfs::getNextRequest(const BankMachine& bankMachine) const
@@ -283,7 +283,7 @@ tlm_generic_payload* SchedulerAgeGrpFrFcfs::getNextRequest(const BankMachine& ba
           it.set_ergent(true);
           {
             stringstream ss;
-            ss << "set_ergent( " << it << ").";
+            ss << "maxAgeWaited reached. ( " << it << ").";
             PRINTDEBUGMESSAGE("getNextRequest():", ss.str());
           }
         }
