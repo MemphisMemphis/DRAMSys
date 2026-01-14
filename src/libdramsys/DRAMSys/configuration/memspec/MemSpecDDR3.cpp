@@ -117,6 +117,8 @@ sc_time MemSpecDDR3::getRefreshIntervalAB() const
 sc_time MemSpecDDR3::getExecutionTime(Command command,
                                       [[maybe_unused]] const tlm_generic_payload& payload) const
 {
+    sc_time data_cycles = (payload.get_data_length() / (bitWidth/8 * dataRate)) * tCK;
+
     if (command == Command::PREPB || command == Command::PREAB)
         return tRP;
 
@@ -124,16 +126,16 @@ sc_time MemSpecDDR3::getExecutionTime(Command command,
         return tRCD;
 
     if (command == Command::RD)
-        return tRL + burstDuration;
+        return tRL + data_cycles;
 
     if (command == Command::RDA)
-        return tRTP + tRP;
+        return tRTP + tRP + data_cycles;
 
     if (command == Command::WR || command == Command::MWR)
-        return tWL + burstDuration;
+        return tWL + data_cycles;
 
     if (command == Command::WRA || command == Command::MWRA)
-        return tWL + burstDuration + tWR + tRP;
+        return tWL + data_cycles + tWR + tRP;
 
     if (command == Command::REFAB)
         return tRFC;
@@ -147,12 +149,14 @@ TimeInterval
 MemSpecDDR3::getIntervalOnDataStrobe(Command command,
                                      [[maybe_unused]] const tlm_generic_payload& payload) const
 {
+    sc_time data_cycles = (payload.get_data_length() / (bitWidth/8 * dataRate)) * tCK;
+
     if (command == Command::RD || command == Command::RDA)
-        return {tRL, tRL + burstDuration};
+        return {tRL, tRL + data_cycles};
 
     if (command == Command::WR || command == Command::WRA || command == Command::MWR ||
         command == Command::MWRA)
-        return {tWL, tWL + burstDuration};
+        return {tWL, tWL + data_cycles};
 
     SC_REPORT_FATAL("MemSpec", "Method was called with invalid argument");
     throw;

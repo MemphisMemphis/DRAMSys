@@ -427,6 +427,7 @@ void Controller::controllerMethod()
 
     // (5) Select one of the ready commands and issue it to the DRAM
     bool readyCmdBlocked = false;
+    static Bank last_bank;
     if (!readyCommands.empty())
     {
         for (auto& it : readyCommands)
@@ -478,8 +479,10 @@ void Controller::controllerMethod()
                 respQueue->insertPayload(trans,
                                          sc_time_stamp() + config.phyDelayFw +
                                              memSpec.getIntervalOnDataStrobe(command, *trans).end +
-                                             config.phyDelayBw + config.thinkDelayBw);
-
+                                             config.phyDelayBw + config.thinkDelayBw +
+                                             ((last_bank == bank) ? SC_ZERO_TIME : 2*memSpec.tCK));
+                last_bank = bank;
+                PRINTDEBUGMESSAGE("bank:", to_string(int(bank)));
                 sc_time triggerTime = respQueue->getTriggerTime();
                 if (triggerTime != scMaxTime)
                     dataResponseEvent.notify(triggerTime - sc_time_stamp());
