@@ -54,6 +54,11 @@ class BankMachine : public ManagerIF
 public:
     CommandTuple::Type getNextCommand() override;
     void update(Command command) override;
+    /* called in situation Rank/BankGroup/2Bank */
+    virtual void update(CommandTuple::Type& cmdTup);
+    /* remember last command and its end time */
+    virtual void setLastTuple(CommandTuple::Type& cmdTup);
+
     void block();
 
     [[nodiscard]] Rank getRank() const;
@@ -85,6 +90,10 @@ protected:
     unsigned refreshManagementCounter = 0;
     const bool refreshManagement = false;
     bool keepTrans = false;
+    /* remember end time of last command */
+    CommandTuple::Type lastCmdTup;
+    /* delay time to start returned by getNextCommand() */
+    sc_core::sc_time startDelay = sc_core::SC_ZERO_TIME;
 };
 
 class BankMachineOpen final : public BankMachine

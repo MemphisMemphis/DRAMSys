@@ -33,6 +33,8 @@
  */
 
 #include "RespQueueFifo.h"
+#include <DRAMSys/common/DebugManager.h>
+using namespace std;
 
 using namespace sc_core;
 using namespace tlm;
@@ -43,6 +45,8 @@ namespace DRAMSys
 void RespQueueFifo::insertPayload(tlm_generic_payload* payload, sc_time strobeEnd)
 {
     buffer.emplace(payload, strobeEnd);
+    PRINTDEBUGMESSAGE(to_string(reinterpret_cast<unsigned long>(this)), "RespQueueFifo::insertPayload(" +
+                      to_string(payload->get_address()) + strobeEnd.to_string());
 }
 
 tlm_generic_payload* RespQueueFifo::nextPayload()
@@ -53,6 +57,8 @@ tlm_generic_payload* RespQueueFifo::nextPayload()
         if (element.second <= sc_time_stamp())
         {
             buffer.pop();
+            PRINTDEBUGMESSAGE(to_string(reinterpret_cast<unsigned long>(this)), "RespQueueFifo::nextPayload(" +
+                      to_string(element.first->get_address()) + element.second.to_string());
             return element.first;
         }
     }
