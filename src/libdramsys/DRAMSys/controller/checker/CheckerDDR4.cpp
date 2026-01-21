@@ -87,7 +87,7 @@ sc_time CheckerDDR4::timeToSatisfyConstraints(Command command, const tlm_generic
     return earliestTimeToStart;
 }
 
-void CheckerDDR4::insert(Command command, const tlm_generic_payload& payload)
+void CheckerDDR4::insert(Command command, const tlm_generic_payload& payload, const sc_core::sc_time delay)
 {
     const Bank bank = ControllerExtension::getBank(payload);
     const BankGroup bankGroup = ControllerExtension::getBankGroup(payload);

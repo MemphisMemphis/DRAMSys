@@ -449,27 +449,34 @@ void Controller::controllerMethod()
             if (command.isRankCommand())
             {
                 for (auto* it : bankMachinesOnRank[rank])
-                    it->update(*commandTuple);
+                    it->update(command);
             }
             else if (command.isGroupCommand())
             {
                 for (std::size_t bankID = (static_cast<std::size_t>(bank) % memSpec.banksPerGroup);
                      bankID < memSpec.banksPerRank;
                      bankID += memSpec.banksPerGroup)
-                    bankMachinesOnRank[rank][Bank(bankID)]->update(*commandTuple);
+                    bankMachinesOnRank[rank][Bank(bankID)]->update(command);
             }
             else if (command.is2BankCommand())
             {
-                bankMachines[bank]->update(*commandTuple);
+                bankMachines[bank]->update(command);
                 bankMachines[Bank(static_cast<std::size_t>(bank) + memSpec.getPer2BankOffset())]
-                    ->update(*commandTuple);
+                    ->update(command);
             }
             else // if (isBankCommand(command))
-                bankMachines[bank]->update(*commandTuple);
+                bankMachines[bank]->update(command);
 
+            // check bank interleave in rank, add delay on shared data bus access
+            sc_core::sc_time old_start = std::get<CommandTuple::Timestamp>(*commandTuple);
+            for (auto* it : bankMachinesOnRank[rank])
+                it->update(*commandTuple);
+
+            sc_core::sc_time bank_delay = std::get<CommandTuple::Timestamp>(*commandTuple) - old_start;
+            PRINTDEBUGMESSAGE(name(), "checker->insert(bank_delay = " + bank_delay.to_string());
             refreshManagers[rank]->update(command);
             powerDownManagers[rank]->update(command);
-            checker->insert(command, *trans);
+            checker->insert(command, *trans, bank_delay);
 
             if (command.isCasCommand())
             {
@@ -477,7 +484,7 @@ void Controller::controllerMethod()
                 removeReqEvent.notify(SC_ZERO_TIME);
 
                 std::get<CommandTuple::Timestamp>(*commandTuple) = std::get<CommandTuple::Timestamp>(*commandTuple) +
-                        sc_time_stamp() + config.phyDelayFw +
+                        config.phyDelayFw +
                         memSpec.getIntervalOnDataStrobe(command, *trans).end +
                         config.phyDelayBw + config.thinkDelayBw;
 

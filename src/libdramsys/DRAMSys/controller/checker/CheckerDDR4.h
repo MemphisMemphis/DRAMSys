@@ -51,7 +51,7 @@ class CheckerDDR4 final : public CheckerIF
 public:
     explicit CheckerDDR4(const MemSpecDDR4& memSpec);
     [[nodiscard]] sc_core::sc_time timeToSatisfyConstraints(Command command, const tlm::tlm_generic_payload& payload) const override;
-    void insert(Command command, const tlm::tlm_generic_payload& payload) override;
+    void insert(Command command, const tlm::tlm_generic_payload& payload, const sc_core::sc_time delay) override;
 
 private:
     const MemSpecDDR4& memSpec;

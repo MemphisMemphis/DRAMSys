@@ -92,8 +92,6 @@ protected:
     bool keepTrans = false;
     /* remember end time of last command */
     CommandTuple::Type lastCmdTup;
-    /* delay time to start returned by getNextCommand() */
-    sc_core::sc_time startDelay = sc_core::SC_ZERO_TIME;
 };
 
 class BankMachineOpen final : public BankMachine

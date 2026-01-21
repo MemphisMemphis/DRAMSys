@@ -442,7 +442,7 @@ sc_time CheckerWideIO::timeToSatisfyConstraints(Command command,
     return earliestTimeToStart;
 }
 
-void CheckerWideIO::insert(Command command, const tlm_generic_payload& payload)
+void CheckerWideIO::insert(Command command, const tlm_generic_payload& payload, const sc_core::sc_time delay)
 {
     Rank rank = ControllerExtension::getRank(payload);
     Bank bank = ControllerExtension::getBank(payload);
