@@ -136,6 +136,22 @@ void CheckerDDR3::insert(Command command, const tlm_generic_payload& payload)
             earliestTimeToStart = std::max(earliestTimeToStart, constraint);
         }
         
+        // Bank (RD,RD) + 2 cycles for different Bank
+        {
+            for (unsigned int i = memSpec.banksPerRank * static_cast<unsigned>(rank) + static_cast<unsigned>(0);
+                    i < memSpec.banksPerRank * (1 + static_cast<unsigned>(rank)); i++) {
+                Bank currentBank { i };
+                sc_time constraint = currentTime + memSpec.tCCD + data_cycles;
+                if (currentBank != bank)
+                    constraint = constraint + 2 * memSpec.tCK;
+
+                sc_time &earliestTimeToStart =
+                        nextCommandByBank[Command::RD][currentBank];
+                earliestTimeToStart = std::max(earliestTimeToStart,
+                                               constraint);
+            }
+        }
+
         // Rank (RD,PREAB) (memSpec.tAL + memSpec.tRTP) [] SameComponent()
         {
             const sc_time constraint = currentTime + (memSpec.tAL + memSpec.tRTP);
