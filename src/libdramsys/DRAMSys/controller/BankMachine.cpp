@@ -33,7 +33,6 @@
  */
 
 #include "BankMachine.h"
-#include <DRAMSys/common/DebugManager.h>
 
 #include <algorithm>
 
@@ -58,7 +57,7 @@ BankMachine::BankMachine(const McConfig& config,
 
 CommandTuple::Type BankMachine::getNextCommand()
 {
-    return {nextCommand, currentPayload, startDelay};
+    return {nextCommand, currentPayload, SC_ZERO_TIME};
 }
 
 void BankMachine::update(Command command)
@@ -135,29 +134,6 @@ void BankMachine::update(Command command)
     default:
         break;
     }
-}
-
-void BankMachine::setLastTuple(CommandTuple::Type& cmdTup) {
-    lastCmdTup = cmdTup;
-}
-
-void BankMachine::update(CommandTuple::Type& cmdTup) {
-    /* Check whether begin time of new command is equal to end time of last command?
-     * And they are on different bank.
-     * There should be 2 cycles delay on data bus.
-     */
-    Bank new_bank = ControllerExtension::getBank(*std::get<CommandTuple::Payload>(cmdTup));
-    if ((bank != new_bank) &&
-            (std::get<CommandTuple::Timestamp>(lastCmdTup) == std::get<CommandTuple::Timestamp>(cmdTup))) {
-        startDelay = 2 * memSpec.tCK;
-        PRINTDEBUGMESSAGE(std::to_string(long(this)), "BankMachine::update(), " +
-                          std::to_string(long(std::get<CommandTuple::Payload>(cmdTup))) +
-                          std::get<CommandTuple::Timestamp>(cmdTup).to_string());
-    } else {
-        startDelay = sc_core::SC_ZERO_TIME;
-    }
-
-    update(std::get<CommandTuple::Command>(cmdTup));
 }
 
 uint64_t BankMachine::getRefreshManagementCounter() const

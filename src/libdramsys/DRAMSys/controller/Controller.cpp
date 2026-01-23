@@ -427,6 +427,7 @@ void Controller::controllerMethod()
 
     // (5) Select one of the ready commands and issue it to the DRAM
     bool readyCmdBlocked = false;
+    static Bank last_bank;
     if (!readyCommands.empty())
     {
         for (auto& it : readyCommands)
@@ -445,27 +446,26 @@ void Controller::controllerMethod()
             Rank rank = ControllerExtension::getRank(*trans);
             Bank bank = ControllerExtension::getBank(*trans);
 
-            PRINTDEBUGMESSAGE(name(), "BankMachine.update(" + command.toString());
             if (command.isRankCommand())
             {
                 for (auto* it : bankMachinesOnRank[rank])
-                    it->update(*commandTuple);
+                    it->update(command);
             }
             else if (command.isGroupCommand())
             {
                 for (std::size_t bankID = (static_cast<std::size_t>(bank) % memSpec.banksPerGroup);
                      bankID < memSpec.banksPerRank;
                      bankID += memSpec.banksPerGroup)
-                    bankMachinesOnRank[rank][Bank(bankID)]->update(*commandTuple);
+                    bankMachinesOnRank[rank][Bank(bankID)]->update(command);
             }
             else if (command.is2BankCommand())
             {
-                bankMachines[bank]->update(*commandTuple);
+                bankMachines[bank]->update(command);
                 bankMachines[Bank(static_cast<std::size_t>(bank) + memSpec.getPer2BankOffset())]
-                    ->update(*commandTuple);
+                    ->update(command);
             }
             else // if (isBankCommand(command))
-                bankMachines[bank]->update(*commandTuple);
+                bankMachines[bank]->update(command);
 
             refreshManagers[rank]->update(command);
             powerDownManagers[rank]->update(command);
@@ -476,16 +476,13 @@ void Controller::controllerMethod()
                 scheduler->removeRequest(*trans);
                 removeReqEvent.notify(SC_ZERO_TIME);
 
-                std::get<CommandTuple::Timestamp>(*commandTuple) = std::get<CommandTuple::Timestamp>(*commandTuple) +
-                        sc_time_stamp() + config.phyDelayFw +
-                        memSpec.getIntervalOnDataStrobe(command, *trans).end +
-                        config.phyDelayBw + config.thinkDelayBw;
-
-                respQueue->insertPayload(trans, std::get<CommandTuple::Timestamp>(*commandTuple));
-
-                // remember latest command and end time
-                bankMachines[bank]->setLastTuple(*commandTuple);
-
+                respQueue->insertPayload(trans,
+                                         sc_time_stamp() + config.phyDelayFw +
+                                             memSpec.getIntervalOnDataStrobe(command, *trans).end +
+                                             config.phyDelayBw + config.thinkDelayBw +
+                                             ((last_bank == bank) ? SC_ZERO_TIME : 2*memSpec.tCK));
+                last_bank = bank;
+                PRINTDEBUGMESSAGE("bank:", to_string(int(bank)));
                 sc_time triggerTime = respQueue->getTriggerTime();
                 if (triggerTime != scMaxTime)
                     dataResponseEvent.notify(triggerTime - sc_time_stamp());
