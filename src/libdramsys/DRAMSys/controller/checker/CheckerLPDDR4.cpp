@@ -87,7 +87,7 @@ sc_time CheckerLPDDR4::timeToSatisfyConstraints(Command command, const tlm_gener
     return earliestTimeToStart;
 }
 
-void CheckerLPDDR4::insert(Command command, const tlm_generic_payload& payload, const sc_core::sc_time delay)
+void CheckerLPDDR4::insert(Command command, const tlm_generic_payload& payload)
 {
     const Bank bank = ControllerExtension::getBank(payload);
     const Rank rank = ControllerExtension::getRank(payload);

@@ -588,7 +588,7 @@ sc_time CheckerGDDR5::timeToSatisfyConstraints(Command command,
     return earliestTimeToStart;
 }
 
-void CheckerGDDR5::insert(Command command, const tlm_generic_payload& payload, const sc_core::sc_time delay)
+void CheckerGDDR5::insert(Command command, const tlm_generic_payload& payload)
 {
     Rank rank = ControllerExtension::getRank(payload);
     BankGroup bankGroup = ControllerExtension::getBankGroup(payload);

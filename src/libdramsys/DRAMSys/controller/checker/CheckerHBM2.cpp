@@ -94,7 +94,7 @@ sc_time CheckerHBM2::timeToSatisfyConstraints(Command command, const tlm_generic
     return earliestTimeToStart;
 }
 
-void CheckerHBM2::insert(Command command, const tlm_generic_payload& payload, const sc_core::sc_time delay)
+void CheckerHBM2::insert(Command command, const tlm_generic_payload& payload)
 {
     const Bank bank = ControllerExtension::getBank(payload);
     const BankGroup bankGroup = ControllerExtension::getBankGroup(payload);

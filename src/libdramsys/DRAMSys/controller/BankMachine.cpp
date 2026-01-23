@@ -58,7 +58,7 @@ BankMachine::BankMachine(const McConfig& config,
 
 CommandTuple::Type BankMachine::getNextCommand()
 {
-    return {nextCommand, currentPayload, sc_core::SC_ZERO_TIME};
+    return {nextCommand, currentPayload, startDelay};
 }
 
 void BankMachine::update(Command command)
@@ -146,27 +146,18 @@ void BankMachine::update(CommandTuple::Type& cmdTup) {
      * And they are on different bank.
      * There should be 2 cycles delay on data bus.
      */
-    Command new_cmd = std::get<CommandTuple::Command>(cmdTup);
-    tlm_generic_payload *new_payload = std::get<CommandTuple::Payload>(cmdTup);
-    Bank new_bank = ControllerExtension::getBank(*new_payload);
-    sc_time data_cycles = (new_payload->get_data_length() / (memSpec.bitWidth/8 * memSpec.dataRate)) * memSpec.tCK;
-    PRINTDEBUGMESSAGE(std::to_string(long(this)), "last_cmd.Bank(" + std::to_string(int(bank)) +
-                      "), last_cmd.end_time: " + std::get<CommandTuple::Timestamp>(lastCmdTup).to_string());
-    PRINTDEBUGMESSAGE(std::to_string(long(this)), "new_cmd.Bank(" + std::to_string(int(new_bank)) +
-                      "), new_cmd.end_time: " + std::get<CommandTuple::Timestamp>(cmdTup).to_string());
+    Bank new_bank = ControllerExtension::getBank(*std::get<CommandTuple::Payload>(cmdTup));
     if ((bank != new_bank) &&
-            (std::get<CommandTuple::Command>(lastCmdTup) == new_cmd) &&
-            (std::get<CommandTuple::Timestamp>(lastCmdTup) ==
-                    (std::get<CommandTuple::Timestamp>(cmdTup) +
-                            memSpec.getExecutionTime(new_cmd, *new_payload) -
-                            memSpec.getIntervalOnDataStrobe(new_cmd, *new_payload).getLength()))) {
-        std::get<CommandTuple::Timestamp>(cmdTup) = std::get<CommandTuple::Timestamp>(cmdTup) + 2 * memSpec.tCK;
+            (std::get<CommandTuple::Timestamp>(lastCmdTup) == std::get<CommandTuple::Timestamp>(cmdTup))) {
+        startDelay = 2 * memSpec.tCK;
         PRINTDEBUGMESSAGE(std::to_string(long(this)), "BankMachine::update(), " +
-                          std::to_string(long(std::get<CommandTuple::Payload>(cmdTup)->get_address())) +
+                          std::to_string(long(std::get<CommandTuple::Payload>(cmdTup))) +
                           std::get<CommandTuple::Timestamp>(cmdTup).to_string());
     } else {
-        PRINTDEBUGMESSAGE(std::to_string(long(this)), "BankMachine::update(), 0");
+        startDelay = sc_core::SC_ZERO_TIME;
     }
+
+    update(std::get<CommandTuple::Command>(cmdTup));
 }
 
 uint64_t BankMachine::getRefreshManagementCounter() const

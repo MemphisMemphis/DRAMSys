@@ -56,7 +56,7 @@ public:
 
     [[nodiscard]] virtual sc_core::sc_time
     timeToSatisfyConstraints(Command command, const tlm::tlm_generic_payload& payload) const = 0;
-    virtual void insert(Command command, const tlm::tlm_generic_payload& payload, const sc_core::sc_time delay = sc_core::SC_ZERO_TIME) = 0;
+    virtual void insert(Command command, const tlm::tlm_generic_payload& payload) = 0;
 };
 
 } // namespace DRAMSys

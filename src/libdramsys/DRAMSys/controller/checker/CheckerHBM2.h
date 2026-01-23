@@ -50,7 +50,7 @@ class CheckerHBM2 final : public CheckerIF
 public:
     explicit CheckerHBM2(const MemSpecHBM2& memSpec);
     [[nodiscard]] sc_core::sc_time timeToSatisfyConstraints(Command command, const tlm::tlm_generic_payload& payload) const override;
-    void insert(Command command, const tlm::tlm_generic_payload& payload, const sc_core::sc_time delay) override;
+    void insert(Command command, const tlm::tlm_generic_payload& payload) override;
 
 private:
     const MemSpecHBM2& memSpec;

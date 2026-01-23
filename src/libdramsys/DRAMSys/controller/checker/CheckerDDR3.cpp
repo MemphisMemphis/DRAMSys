@@ -84,7 +84,7 @@ sc_time CheckerDDR3::timeToSatisfyConstraints(Command command, const tlm_generic
     return earliestTimeToStart;
 }
 
-void CheckerDDR3::insert(Command command, const tlm_generic_payload& payload, const sc_core::sc_time delay = sc_core::SC_ZERO_TIME)
+void CheckerDDR3::insert(Command command, const tlm_generic_payload& payload)
 {
     const Bank bank = ControllerExtension::getBank(payload);
     const Rank rank = ControllerExtension::getRank(payload);
@@ -93,7 +93,7 @@ void CheckerDDR3::insert(Command command, const tlm_generic_payload& payload, co
     PRINTDEBUGMESSAGE("CheckerDDR3", "Changing state on bank " + std::to_string(static_cast<std::size_t>(bank))
                       + " command is " + command.toString()  + AD(payload));
     
-    const sc_time& currentTime = sc_time_stamp() + delay;
+    const sc_time& currentTime = sc_time_stamp();
     
     sc_time data_cycles = (payload.get_data_length()/(memSpec.bitWidth / 8 * memSpec.dataRate)) * memSpec.tCK;
 
