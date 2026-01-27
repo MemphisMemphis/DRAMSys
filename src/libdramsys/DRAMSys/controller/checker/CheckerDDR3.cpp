@@ -54,10 +54,7 @@ CheckerDDR3::CheckerDDR3(const MemSpecDDR3& memSpec) : memSpec(memSpec)
     last4ActivatesOnRank = RankVector<std::queue<sc_time>>(memSpec.ranksPerChannel);
 
     tBURST = ((memSpec.defaultBurstLength / memSpec.dataRate) * memSpec.tCK);
-    /* Rd to Wr delay
-     * CX4 tRTWp = 5, CX4 spec. Figure 43
-     */
-    tRDWR = (((memSpec.tRL + tBURST) + (memSpec.tCK * 5/*2*/)) - memSpec.tWL);
+    tRDWR = (((memSpec.tRL + tBURST) + (memSpec.tCK * 2)) - memSpec.tWL);
     tRDWR_R = (((memSpec.tRL + tBURST) + memSpec.tRTRS) - memSpec.tWL);
     tWRRD = (((memSpec.tWL + tBURST) + memSpec.tWTR) - memSpec.tAL);
     tWRRD_R = (((memSpec.tWL + tBURST) + memSpec.tRTRS) - memSpec.tRL);
@@ -91,12 +88,10 @@ void CheckerDDR3::insert(Command command, const tlm_generic_payload& payload)
     
 
     PRINTDEBUGMESSAGE("CheckerDDR3", "Changing state on bank " + std::to_string(static_cast<std::size_t>(bank))
-                      + " command is " + command.toString()  + AD(payload));
+                      + " command is " + command.toString());
     
     const sc_time& currentTime = sc_time_stamp();
     
-    sc_time data_cycles = (payload.get_data_length()/(memSpec.bitWidth / 8 * memSpec.dataRate)) * memSpec.tCK;
-
     switch (command)
     {
     case Command::RD:
@@ -136,22 +131,6 @@ void CheckerDDR3::insert(Command command, const tlm_generic_payload& payload)
             earliestTimeToStart = std::max(earliestTimeToStart, constraint);
         }
         
-        // Bank (RD,RD) + 2 cycles for different Bank
-        {
-            for (unsigned int i = memSpec.banksPerRank * static_cast<unsigned>(rank) + static_cast<unsigned>(0);
-                    i < memSpec.banksPerRank * (1 + static_cast<unsigned>(rank)); i++) {
-                Bank currentBank { i };
-                sc_time constraint = currentTime + memSpec.tCCD + data_cycles;
-                if (currentBank != bank)
-                    constraint = constraint + 2 * memSpec.tCK;
-
-                sc_time &earliestTimeToStart =
-                        nextCommandByBank[Command::RD][currentBank];
-                earliestTimeToStart = std::max(earliestTimeToStart,
-                                               constraint);
-            }
-        }
-
         // Rank (RD,PREAB) (memSpec.tAL + memSpec.tRTP) [] SameComponent()
         {
             const sc_time constraint = currentTime + (memSpec.tAL + memSpec.tRTP);
@@ -175,14 +154,14 @@ void CheckerDDR3::insert(Command command, const tlm_generic_payload& payload)
         
         // Rank (RD,RD) memSpec.tCCD [] SameComponent()
         {
-            sc_time constraint = currentTime + memSpec.tCCD + data_cycles;
+            const sc_time constraint = currentTime + memSpec.tCCD;
             sc_time &earliestTimeToStart = nextCommandByRank[Command::RD][rank];
             earliestTimeToStart = std::max(earliestTimeToStart, constraint);
         }
         
         // Rank (RD,RDA) memSpec.tCCD [] SameComponent()
         {
-            sc_time constraint = currentTime + memSpec.tCCD + data_cycles;
+            const sc_time constraint = currentTime + memSpec.tCCD;
             sc_time &earliestTimeToStart = nextCommandByRank[Command::RDA][rank];
             earliestTimeToStart = std::max(earliestTimeToStart, constraint);
         }
@@ -698,7 +677,7 @@ void CheckerDDR3::insert(Command command, const tlm_generic_payload& payload)
     {
         // Bank (RDA,ACT) ((memSpec.tAL + memSpec.tRTP) + memSpec.tRP) [] SameComponent()
         {
-            const sc_time constraint = currentTime + ((memSpec.tAL + memSpec.tRTP) + memSpec.tRP + data_cycles);
+            const sc_time constraint = currentTime + ((memSpec.tAL + memSpec.tRTP) + memSpec.tRP);
             sc_time &earliestTimeToStart = nextCommandByBank[Command::ACT][bank];
             earliestTimeToStart = std::max(earliestTimeToStart, constraint);
         }
@@ -761,7 +740,7 @@ void CheckerDDR3::insert(Command command, const tlm_generic_payload& payload)
         
         // Rank (RDA,REFAB) ((memSpec.tAL + memSpec.tRTP) + memSpec.tRP) [] SameComponent()
         {
-            const sc_time constraint = currentTime + ((memSpec.tAL + memSpec.tRTP) + memSpec.tRP + data_cycles);
+            const sc_time constraint = currentTime + ((memSpec.tAL + memSpec.tRTP) + memSpec.tRP);
             sc_time &earliestTimeToStart = nextCommandByRank[Command::REFAB][rank];
             earliestTimeToStart = std::max(earliestTimeToStart, constraint);
         }
@@ -775,7 +754,7 @@ void CheckerDDR3::insert(Command command, const tlm_generic_payload& payload)
         
         // Rank (RDA,SREFEN) std::max(tRDPDEN, ((memSpec.tAL + memSpec.tRTP) + memSpec.tRP)) [] SameComponent()
         {
-            const sc_time constraint = currentTime + std::max(tRDPDEN, ((memSpec.tAL + memSpec.tRTP) + memSpec.tRP + data_cycles));
+            const sc_time constraint = currentTime + std::max(tRDPDEN, ((memSpec.tAL + memSpec.tRTP) + memSpec.tRP));
             sc_time &earliestTimeToStart = nextCommandByRank[Command::SREFEN][rank];
             earliestTimeToStart = std::max(earliestTimeToStart, constraint);
         }
@@ -877,7 +856,7 @@ void CheckerDDR3::insert(Command command, const tlm_generic_payload& payload)
     {
         // Bank (WRA,ACT) (tWRPRE + memSpec.tRP) [] SameComponent()
         {
-            const sc_time constraint = currentTime + (tWRPRE + memSpec.tRP + data_cycles);
+            const sc_time constraint = currentTime + (tWRPRE + memSpec.tRP);
             sc_time &earliestTimeToStart = nextCommandByBank[Command::ACT][bank];
             earliestTimeToStart = std::max(earliestTimeToStart, constraint);
         }
@@ -940,7 +919,7 @@ void CheckerDDR3::insert(Command command, const tlm_generic_payload& payload)
         
         // Rank (WRA,REFAB) (tWRPRE + memSpec.tRP) [] SameComponent()
         {
-            const sc_time constraint = currentTime + (tWRPRE + memSpec.tRP + data_cycles);
+            const sc_time constraint = currentTime + (tWRPRE + memSpec.tRP);
             sc_time &earliestTimeToStart = nextCommandByRank[Command::REFAB][rank];
             earliestTimeToStart = std::max(earliestTimeToStart, constraint);
         }
@@ -954,7 +933,7 @@ void CheckerDDR3::insert(Command command, const tlm_generic_payload& payload)
         
         // Rank (WRA,SREFEN) std::max(tWRAPDEN, (tWRPRE + memSpec.tRP)) [] SameComponent()
         {
-            const sc_time constraint = currentTime + std::max(tWRAPDEN, (tWRPRE + memSpec.tRP + data_cycles));
+            const sc_time constraint = currentTime + std::max(tWRAPDEN, (tWRPRE + memSpec.tRP));
             sc_time &earliestTimeToStart = nextCommandByRank[Command::SREFEN][rank];
             earliestTimeToStart = std::max(earliestTimeToStart, constraint);
         }
@@ -1056,7 +1035,7 @@ void CheckerDDR3::insert(Command command, const tlm_generic_payload& payload)
     {
         // Bank (MWRA,ACT) (tWRPRE + memSpec.tRP) [] SameComponent()
         {
-            const sc_time constraint = currentTime + (tWRPRE + memSpec.tRP + data_cycles);
+            const sc_time constraint = currentTime + (tWRPRE + memSpec.tRP);
             sc_time &earliestTimeToStart = nextCommandByBank[Command::ACT][bank];
             earliestTimeToStart = std::max(earliestTimeToStart, constraint);
         }
@@ -1119,7 +1098,7 @@ void CheckerDDR3::insert(Command command, const tlm_generic_payload& payload)
         
         // Rank (MWRA,REFAB) (tWRPRE + memSpec.tRP) [] SameComponent()
         {
-            const sc_time constraint = currentTime + (tWRPRE + memSpec.tRP + data_cycles);
+            const sc_time constraint = currentTime + (tWRPRE + memSpec.tRP);
             sc_time &earliestTimeToStart = nextCommandByRank[Command::REFAB][rank];
             earliestTimeToStart = std::max(earliestTimeToStart, constraint);
         }
@@ -1133,7 +1112,7 @@ void CheckerDDR3::insert(Command command, const tlm_generic_payload& payload)
         
         // Rank (MWRA,SREFEN) std::max(tWRAPDEN, (tWRPRE + memSpec.tRP)) [] SameComponent()
         {
-            const sc_time constraint = currentTime + std::max(tWRAPDEN, (tWRPRE + memSpec.tRP + data_cycles));
+            const sc_time constraint = currentTime + std::max(tWRAPDEN, (tWRPRE + memSpec.tRP));
             sc_time &earliestTimeToStart = nextCommandByRank[Command::SREFEN][rank];
             earliestTimeToStart = std::max(earliestTimeToStart, constraint);
         }
