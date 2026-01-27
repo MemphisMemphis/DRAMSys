@@ -58,6 +58,7 @@ add_library(libdramsys
     DRAMSys/controller/Command.cpp
     DRAMSys/controller/Controller.cpp
     DRAMSys/controller/McConfig.cpp
+    DRAMSys/controller/checker/Checker3D.cpp
     DRAMSys/controller/checker/CheckerDDR3.cpp
     DRAMSys/controller/checker/CheckerDDR4.cpp
     DRAMSys/controller/checker/CheckerGDDR5.cpp

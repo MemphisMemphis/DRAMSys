@@ -39,6 +39,7 @@
 
 #include "DRAMSys/common/dramExtensions.h"
 #include "DRAMSys/config/McConfig.h"
+#include "DRAMSys/controller/checker/Checker3D.h"
 #include "DRAMSys/controller/checker/CheckerDDR3.h"
 #include "DRAMSys/controller/checker/CheckerDDR4.h"
 #include "DRAMSys/controller/checker/CheckerGDDR5.h"
@@ -136,7 +137,9 @@ Controller::Controller(const sc_module_name& name,
     {
         if (memSpec.memoryType == DRAMUtils::MemSpec::MemSpecDDR3::id)
         {
-            checker = std::make_unique<CheckerDDR3>(dynamic_cast<const MemSpecDDR3&>(memSpec));
+            // checker = std::make_unique<CheckerDDR3>(dynamic_cast<const MemSpecDDR3&>(memSpec));
+            // use memSpec3D instead of DDR3
+            checker = std::make_unique<Checker3D>(dynamic_cast<const MemSpecDDR3&>(memSpec));
         }
         else if (memSpec.memoryType == DRAMUtils::MemSpec::MemSpecDDR4::id)
         {
